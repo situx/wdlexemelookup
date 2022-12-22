@@ -9,16 +9,17 @@ chrome.tabs.query({}, (tabs) => tabs.forEach( tab => chrome.tabs.sendMessage(tab
 chrome.storage.sync.set({active: document.getElementById('active').checked,language:document.getElementById("language").value});
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("load", (event) => {
   	console.log("DOCUMENT READY")
-	console.log(localStorage)
-    if (localStorage.getItem('active')==true) {
-		document.getElementById('active').checked=true;
-    } else {
-		document.getElementById('active').checked=false;
-    }
-	if (localStorage.getItem('language')) {
-		val=localStorage.getItem('language')
+	chrome.storage.sync.get('active', function(data) {
+		if(data.active==true){
+			document.getElementById('active').checked=true;
+		}else{
+			document.getElementById('active').checked=false;		
+		}
+	});
+	chrome.storage.sync.get('language', function(data) {
+		val=data.language
 		document.getElementById('language').value = val;
-    }
+	});
 });

@@ -5,6 +5,8 @@ active=true
 querylanguage="en"
 stillinword=false
 wordinfocache={"en":{}}
+eventhandleradded=false
+eventhandlerfunc=null
 
 chrome.storage.sync.get('language', data => {
   if(typeof(data.language)!=='undefined'){
@@ -30,10 +32,14 @@ chrome.storage.onChanged.addListener(changes => {
 chrome.runtime.onMessage.addListener(msgObj => {
 	console.log("GOT MESSAGE")
 	console.log(msgObj)
-	if("active" in msgObj && msgObj["active"]==true){
+	if("active" in msgObj && msgObj["active"]==true && eventhandleradded==false){
+		eventhandlerfunc=mouseMoveHandler
 		document.addEventListener('mousemove', mouseMoveHandler);
-	}else{
-		document.removeEventListener('mousemove',mouseMoveHandler,true)
+		eventhandleradded=true
+	}else if(eventhandleradded && "active" in msgObj && msgObj["active"]==false){
+		document.removeEventListener('mousemove',mouseMoveHandler)
+		eventhandleradded=false
+		unwrapFromTag(curword,lasthighlight)
 	}	
 });
 
