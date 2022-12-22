@@ -8,3 +8,11 @@ To use the Chrome extension, activate its usage in the popup menu and select a s
 * Hover over a single word. If the word is included in Wikidata's Lexeme database a popup with information about the Lexeme in Wikidata is shown
 * The content of the popup depends on the availability of information in Wikidata
 * Some languages might be better covered than others
+
+# Installation
+
+* Clone this Github Repository or simply download the contents of this repository as a ZIP file
+* Unpack the extension in a folder of your choice
+* Go to the extension menu in Google Chrome or any browser that supports Chrome extensions
+* Activate "Developer mode"
+* Choose to load an unpacked extension and choose the folder of your unpacked extension
