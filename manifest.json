@@ -17,7 +17,7 @@
     [
         {
             "matches":["https://*/*"],
-            "js": ["d3-sparql.min.js","jquery.js", "jquery-ui.min.js","popup.js"],
+            "js": ["d3-sparql.min.js","jquery.js", "jquery-ui.min.js","content.js"],
             "css": ["style.css"],
             "run_at": "document_end"
         }
