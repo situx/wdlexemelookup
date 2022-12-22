@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Wikidata Lexeme Popup</title>
+    <!--<script src="popup.js"></script>-->
+  </head>
+  <body>
+    <h1>Wikidata Lexeme Popup</h1>
+	Active: <input type="checkbox" id="active"/><br/>
+    Choose language:<select id="language"><option value="sux">Sumerian</option><option value="en">English</option></select>
+  </body>
+  <script>
+  document.getElementById('language').onchange = function () {
+    console.log("LANGUAGE CHANGED!!!!")
+	chrome.tabs.query({}, (tabs) => tabs.forEach( tab => chrome.tabs.sendMessage(tab.id, {"language":this.value}) ) );
+	chrome.storage.sync.set({language: this.value});
+  };
+   document.getElementById('active').onchange = function () {
+    console.log("ACTIVE CHANGED!!!!")
+	chrome.tabs.query({}, (tabs) => tabs.forEach( tab => chrome.tabs.sendMessage(tab.id, {"active":this.value}) ) );
+	chrome.storage.sync.set({active: this.value});
+  };
+  </script>
+</html>
