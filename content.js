@@ -7,6 +7,7 @@ stillinword=false
 wordinfocache={"en":{}}
 eventhandleradded=false
 eventhandlerfunc=null
+lastcontainer=null
 
 chrome.storage.sync.get('language', data => {
   if(typeof(data.language)!=='undefined'){
@@ -107,22 +108,30 @@ function cleanString(toclean){
 }
 
 function expandRangeToNextWhitespace(range){
-  //while(!range.toString().endsWith(" ") || !range.toString().endsWith("\n")){
+  lastchar=range.toString().charAt(range.toString().length-1)
+  while(lastchar!=" " && lastchar!="\n" && range.startOffset+(range.endOffset-range.startOffset)<range.startContainer.length){
+	range.setEnd(range.startContainer, range.endOffset+1)
+	console.log(range.toString().charAt(range.toString().length-1))
+	lastchar=range.toString().charAt(range.toString().length-1)
 	//console.log("EXPAND: "+range.expand("character"))
 	//range.select()
 	//console.log(range)
-  //}
+  }
+  lastcontainer=range.startContainer
   return range
 }
 
 function getWordAtPoint(x, y) {
   var range = document.caretRangeFromPoint(x, y);
-  if (range!=null && range.startContainer.nodeType === Node.TEXT_NODE) {
-    range.expand('word');
-	range=expandRangeToNextWhitespace(range)
-	//console.log(range.toString().trim())
-	//console.log(document.elementFromPoint(x,y))
-    return [cleanString(range.toString()),range.startContainer.parentElement];
+  if(range!=null && range.startContainer!=lastcontainer){
+	if (range.startContainer.nodeType === Node.TEXT_NODE) {
+		range.expand('word');
+		range=expandRangeToNextWhitespace(range)
+		console.log(range)
+		//console.log(range.toString().trim())
+		//console.log(document.elementFromPoint(x,y))
+		return [cleanString(range.toString()),range.startContainer.parentElement];
+	}
   }
   return null;
 }
