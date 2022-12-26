@@ -117,6 +117,17 @@ function expandRangeToNextWhitespace(range){
 	//range.select()
 	//console.log(range)
   }
+  if(range.startOffset>0){
+	firstchar=range.toString().charAt(0)
+	while(firstchar!=" " && range.startOffset>0){
+		range.setStart(range.startContainer, range.startOffset-1)
+		console.log(range.toString().charAt(range.toString().length-1))
+		firstchar=range.toString().charAt(0)
+		//console.log("EXPAND: "+range.expand("character"))
+		//range.select()
+		//console.log(range)
+	}
+ }
   lastcontainer=range.startContainer
   return range
 }
