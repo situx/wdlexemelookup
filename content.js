@@ -167,7 +167,7 @@ function getWordAtPoint(x, y) {
 		//console.log(document.elementFromPoint(x,y))
 		return [cleanString(range.toString()),range.startContainer.parentElement];
 	}
-  }else if(range.startContainer==lastcontainer){
+  }else if(range!=null && range.startContainer==lastcontainer){
 	return false
   }
   return null;
@@ -217,7 +217,7 @@ function formatPopup(data,spanitem,word){
 		thetitletext={}
 		for(item in data){
 			thetitle+="<li><a href=\""+data[item]["l"]+"\">"+data[item]["lemma"]+"</a> ("+data[item]["lexcatlabel"]+") [<a href=\""+data[item]["senseval"]+"\">"+data[item]["senselabel"]+"</a>]</li>"
-			thetitletext[data[item]["lemma"]+" ("+data[item]["lexcatlabel"]+") ["+data[item]["senselabel"]+"] \n"]=true
+			thetitletext[data[item]["lemma"]+" ("+data[item]["lexcatlabel"]+(data[item]["gflabel"]?" "+data[item]["gflabel"]:"")+") ["+data[item]["senselabel"]+"] \n"]=true
 		}
 		thetitle+="</ul>"
 		console.log(thetitletext)
