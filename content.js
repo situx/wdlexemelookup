@@ -4,7 +4,7 @@ lasthighlight=null
 active=true
 querylanguage="en"
 stillinword=false
-languagereplacements={"sux":{"#":"","!","","?":""}}
+languagereplacements={"sux":{"#":"","!":"","?":""}}
 wordinfocache={"en":{}}
 eventhandleradded=false
 eventhandlerfunc=null
@@ -72,7 +72,6 @@ function mouseMoveHandler(event){
 	x = event.pageX;
 	y = event.pageY;
 	curwordnew=getWordAtPoint(x, y)
-	console.log(curwordnew+" - "+curword)
 	if(curwordnew!=null && curword!=curwordnew[0] && curwordnew[0]!=null && curwordnew[0].trim()!="" ){
 		console.log(curwordnew[0])
 		if(lasthighlight!=null && curword!=null){
