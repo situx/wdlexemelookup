@@ -44,11 +44,34 @@ chrome.runtime.onMessage.addListener(msgObj => {
 	}	
 });
 
+function getScrollAwareRange(x,y){
+    var elm, scrollX, scrollY, newX, newY;
+    /* stash current Window Scroll */
+    scrollX = window.pageXOffset;
+    scrollY = window.pageYOffset;
+    /* scroll to element */
+    window.scrollTo(x,y);
+    /* calculate new relative element coordinates */
+    newX = x - window.pageXOffset;
+    newY = y - window.pageYOffset;
+    /* grab the element */
+	if (document.caretPositionFromPoint) {
+		var range = document.caretPositionFromPoint(newX, newY);
+	} else if (document.caretRangeFromPoint) {
+		var range = document.caretRangeFromPoint(newX, newY);
+	}
+    //elm = this.elementFromPoint(newX,newY);
+    /* revert to the previous scroll location */
+    window.scrollTo(scrollX,scrollY);
+    /* returned the grabbed element at the absolute coordinates */
+    return range;
+}
+
 function mouseMoveHandler(event){
 	x = event.pageX;
 	y = event.pageY;
 	curwordnew=getWordAtPoint(x, y)
-	//console.log(curwordnew)
+	console.log(curwordnew+" - "+curword)
 	if(curwordnew!=null && curword!=curwordnew[0] && curwordnew[0]!=null && curwordnew[0].trim()!="" ){
 		console.log(curwordnew[0])
 		if(lasthighlight!=null && curword!=null){
@@ -133,8 +156,9 @@ function expandRangeToNextWhitespace(range){
 }
 
 function getWordAtPoint(x, y) {
-  var range = document.caretRangeFromPoint(x, y);
+  range=getScrollAwareRange(x,y)
   if(range!=null && range.startContainer!=lastcontainer){
+	console.log(range.startContainer.nodeType)
 	if (range.startContainer.nodeType === Node.TEXT_NODE) {
 		range.expand('word');
 		range=expandRangeToNextWhitespace(range)
