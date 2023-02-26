@@ -4,6 +4,7 @@ lasthighlight=null
 active=true
 querylanguage="en"
 stillinword=false
+languagereplacements={"sux":{"#":"","!","","?":""}}
 wordinfocache={"en":{}}
 eventhandleradded=false
 eventhandlerfunc=null
