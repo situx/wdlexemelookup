@@ -2,7 +2,30 @@ curword=null
 lastpopup=null
 lasthighlight=null
 active=true
+stillinword=false
 wordinfocache={}
+
+document.addEventListener('mousemove', (event) => {
+	x = event.pageX;
+	y = event.pageY;
+	curwordnew=getWordAtPoint(x, y)
+	console.log(curwordnew)
+	console.log(wordinfocache)
+	if(curwordnew!=null && curword!=curwordnew[0] && curwordnew[0]!=null && curwordnew[0].trim()!="" ){
+		console.log(curwordnew)
+		if(curwordnew[1]!=null){
+			wrapWordInTag(curwordnew[0],curwordnew[1])
+		}
+		if(lasthighlight!=null && curword!=null){
+			unwrapFromTag(curword,lasthighlight)
+		}
+		curword=curwordnew[0]
+	}/*else if(curwordnew==null){
+		if(lasthighlight!=null && curword!=null){
+			unwrapFromTag(curword,lasthighlight)
+		}
+	}*/
+});
 
 
 chrome.runtime.onMessage.addListener(msgObj => {
@@ -38,6 +61,10 @@ function getWordAtPoint(x, y) {
   var range = document.caretRangeFromPoint(x, y);
   if (range!=null && range.startContainer.nodeType === Node.TEXT_NODE) {
     range.expand('word');
+	range.expand('character');
+	if(!range.toString().endsWith(" ")){
+		range.expand('word');
+	}
 	console.log(range.toString().trim())
 	console.log(document.elementFromPoint(x,y))
     return [range.toString().trim(),range.startContainer.parentElement];
@@ -46,12 +73,17 @@ function getWordAtPoint(x, y) {
 }
 
 function wrapWordInTag(word,parentElem){
+	if(stillinword)
+		return
+	stillinword=true
+	console.log(parentElem)
 	curtext=parentElem.innerHTML
+	console.log(curtext)
 	if(word in wordinfocache){
-		curtext=curtext.replaceAll(word,"<span id=\"highlightcunei\" title=\""+wordinfocache[word]+"\">"+word+"</span>")
+		curtext=curtext.replaceAll(word+" ","<span id=\"highlightcunei\" class=\"highlightcunei\" title=\""+wordinfocache[word]+"\">"+word+" </span>")
 		parentElem.innerHTML=curtext
 	}else{
-		curtext=curtext.replaceAll(word,"<span id=\"highlightcunei\">"+word+"</span>")
+		curtext=curtext.replaceAll(word+" ","<span id=\"highlightcunei\" class=\"highlightcunei\">"+word+" </span>")
 		parentElem.innerHTML=curtext
 		wordInformationFromWikidata("sux",word,document.getElementById('highlightcunei'))
 	}
@@ -61,6 +93,7 @@ function wrapWordInTag(word,parentElem){
 function unwrapFromTag(word,parentElem){
 	//curtext=parentElem.innerHTML
 	$('#highlightcunei').contents().unwrap()
+	stillinword=false
 	//parentElem.innerHTML=curtext
 }
 
