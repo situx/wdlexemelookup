@@ -4,6 +4,7 @@ lasthighlight=null
 active=true
 querylanguage="en"
 stillinword=false
+languagereplacements={"sux":{"#":"","!":"","?":""}}
 wordinfocache={"en":{}}
 eventhandleradded=false
 eventhandlerfunc=null
@@ -44,11 +45,33 @@ chrome.runtime.onMessage.addListener(msgObj => {
 	}	
 });
 
+function getScrollAwareRange(x,y){
+    var elm, scrollX, scrollY, newX, newY;
+    /* stash current Window Scroll */
+    scrollX = window.pageXOffset;
+    scrollY = window.pageYOffset;
+    /* scroll to element */
+    window.scrollTo(x,y);
+    /* calculate new relative element coordinates */
+    newX = x - window.pageXOffset;
+    newY = y - window.pageYOffset;
+    /* grab the element */
+	if (document.caretPositionFromPoint) {
+		var range = document.caretPositionFromPoint(newX, newY);
+	} else if (document.caretRangeFromPoint) {
+		var range = document.caretRangeFromPoint(newX, newY);
+	}
+    //elm = this.elementFromPoint(newX,newY);
+    /* revert to the previous scroll location */
+    window.scrollTo(scrollX,scrollY);
+    /* returned the grabbed element at the absolute coordinates */
+    return range;
+}
+
 function mouseMoveHandler(event){
 	x = event.pageX;
 	y = event.pageY;
 	curwordnew=getWordAtPoint(x, y)
-	//console.log(curwordnew)
 	if(curwordnew!=null && curword!=curwordnew[0] && curwordnew[0]!=null && curwordnew[0].trim()!="" ){
 		console.log(curwordnew[0])
 		if(lasthighlight!=null && curword!=null){
@@ -111,7 +134,7 @@ function expandRangeToNextWhitespace(range){
   lastchar=range.toString().charAt(range.toString().length-1)
   while(lastchar!=" " && lastchar!="\n" && range.startOffset+(range.endOffset-range.startOffset)<range.startContainer.length){
 	range.setEnd(range.startContainer, range.endOffset+1)
-	console.log(range.toString().charAt(range.toString().length-1))
+	//console.log(range.toString().charAt(range.toString().length-1))
 	lastchar=range.toString().charAt(range.toString().length-1)
 	//console.log("EXPAND: "+range.expand("character"))
 	//range.select()
@@ -121,7 +144,7 @@ function expandRangeToNextWhitespace(range){
 	firstchar=range.toString().charAt(0)
 	while(firstchar!=" " && range.startOffset>0){
 		range.setStart(range.startContainer, range.startOffset-1)
-		console.log(range.toString().charAt(range.toString().length-1))
+		//console.log(range.toString().charAt(range.toString().length-1))
 		firstchar=range.toString().charAt(0)
 		//console.log("EXPAND: "+range.expand("character"))
 		//range.select()
@@ -132,9 +155,17 @@ function expandRangeToNextWhitespace(range){
   return range
 }
 
+function replaceAll(str,mapObj){
+	for(rep in mapObj){
+		str=str.replaceAll(rep,mapObj[rep])
+	}
+	return str
+}
+
 function getWordAtPoint(x, y) {
-  var range = document.caretRangeFromPoint(x, y);
+  range=getScrollAwareRange(x,y)
   if(range!=null && range.startContainer!=lastcontainer){
+	console.log(range.startContainer.nodeType)
 	if (range.startContainer.nodeType === Node.TEXT_NODE) {
 		range.expand('word');
 		range=expandRangeToNextWhitespace(range)
@@ -143,6 +174,8 @@ function getWordAtPoint(x, y) {
 		//console.log(document.elementFromPoint(x,y))
 		return [cleanString(range.toString()),range.startContainer.parentElement];
 	}
+  }else if(range!=null && range.startContainer==lastcontainer){
+	return false
   }
   return null;
 }
@@ -191,7 +224,7 @@ function formatPopup(data,spanitem,word){
 		thetitletext={}
 		for(item in data){
 			thetitle+="<li><a href=\""+data[item]["l"]+"\">"+data[item]["lemma"]+"</a> ("+data[item]["lexcatlabel"]+") [<a href=\""+data[item]["senseval"]+"\">"+data[item]["senselabel"]+"</a>]</li>"
-			thetitletext[data[item]["lemma"]+" ("+data[item]["lexcatlabel"]+") ["+data[item]["senselabel"]+"] \n"]=true
+			thetitletext[data[item]["lemma"]+" ("+data[item]["lexcatlabel"]+(data[item]["gflabel"]?" "+data[item]["gflabel"]:"")+") ["+data[item]["senselabel"]+"] \n"]=true
 		}
 		thetitle+="</ul>"
 		console.log(thetitletext)
@@ -208,7 +241,10 @@ function formatPopup(data,spanitem,word){
 
 function wordInformationFromWikidata(lang,word,spanitem){
 	//console.log(spanitem)
-	query=word	
+	query=word
+	if(lang in languagereplacements){
+		word=replaceAll(word,languagereplacements[lang])
+	}
 	limit=5
 	var sparql = `
 		  SELECT DISTINCT ?l ?lf ?senseval ?senselabel ?lexcatlabel ?lfgram ?gflabel (GROUP_CONCAT(DISTINCT ?lemmaa; separator=" / ") as ?lemma) WHERE {
