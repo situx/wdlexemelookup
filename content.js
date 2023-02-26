@@ -167,6 +167,8 @@ function getWordAtPoint(x, y) {
 		//console.log(document.elementFromPoint(x,y))
 		return [cleanString(range.toString()),range.startContainer.parentElement];
 	}
+  }else if(range.startContainer==lastcontainer){
+	return false
   }
   return null;
 }
