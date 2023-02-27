@@ -4,7 +4,7 @@ lasthighlight=null
 active=true
 querylanguage="en"
 stillinword=false
-languagereplacements={"sux":{"#":"","!":"","?":""}}
+languagereplacements={"akk":{"#":"","!":"","?":"","[":"","]":""},"hit":{"#":"","!":"","?":"","[":"","]":""},"sux":{"#":"","!":"","?":"","[":"","]":""}}
 wordinfocache={"en":{}}
 eventhandleradded=false
 eventhandlerfunc=null
@@ -68,6 +68,11 @@ function getScrollAwareRange(x,y){
     return range;
 }
 
+function showCuneiPopup() {
+  var popup = document.getElementById("myCuneiPopup");
+  popup.classList.toggle("show");
+}
+
 function mouseMoveHandler(event){
 	x = event.pageX;
 	y = event.pageY;
@@ -78,7 +83,7 @@ function mouseMoveHandler(event){
 			unwrapFromTag(curword,lasthighlight)
 		}
 		if(curwordnew[1]!=null){
-			wrapWordInTag(curwordnew[0],curwordnew[1])
+			wrapWordInTag(curwordnew[0],curwordnew[1],curwordnew[2])
 		}
 		curword=curwordnew[0]
 	}else if(curwordnew==null){
@@ -89,8 +94,24 @@ function mouseMoveHandler(event){
 }
 
 
-function handleText(node,word) {
+function replaceWithinRange(s,start,end,toreplace,substitute){
+	console.log(s)
+	console.log(s.substring(0,start))
+	console.log(s.substring(start,end))
+	console.log(s.substring(start,end).replaceAll(toreplace,substitute))
+	return s.substring(0,start)+s.substring(start,end).replaceAll(toreplace,substitute)+s.substring(end);
+}
+
+
+function handleText(node,word,range) {
 	var curtext = node.innerHTML;
+	console.log(curtext)
+	console.log(range)
+	console.log(curtext.substring(range.startOffset,range.endOffset))
+	var span = document.createElement('div');
+	span.id="highlightcunei"
+	span.classList.add("highlightcuneipopup")
+	span.addEventListener("mouseover",function(event){document.getElementById('myCuneiPopup').classList.toggle('show')})
 	//console.log(curtext)
 	if(word in wordinfocache[querylanguage]){
 		curtext=curtext.replaceAll(word,"<span id=\"highlightcunei\" class=\"highlightcunei\" title=\""+wordinfocache[querylanguage][word]+"\">"+word+"</span>")
@@ -100,16 +121,19 @@ function handleText(node,word) {
 		node.innerHTML = curtext;
 		wordInformationFromWikidata(querylanguage,word,document.getElementById('highlightcunei'))
 	}
-	//console.log(curtext)   
+    //range.deleteContents();
+    //range.insertNode(span);
+	//console.log(curtext)
 }
 
-function walk(node,word) {
+
+function walk(node,word,range) {
 
   var child, next;
   switch (node.nodeType) {
 
     case 1:
-      handleText(node,word);
+      handleText(node,word,range);
       break;
     case 9:
     case 11:
@@ -127,7 +151,7 @@ function walk(node,word) {
 }
 
 function cleanString(toclean){
-	return toclean.replaceAll(",","").replaceAll("(","").replaceAll(")","").trim()
+	return toclean.replaceAll(",","").trim()
 }
 
 function expandRangeToNextWhitespace(range){
@@ -172,7 +196,7 @@ function getWordAtPoint(x, y) {
 		console.log(range)
 		//console.log(range.toString().trim())
 		//console.log(document.elementFromPoint(x,y))
-		return [cleanString(range.toString()),range.startContainer.parentElement];
+		return [cleanString(range.toString()),range.startContainer.parentElement,range];
 	}
   }else if(range!=null && range.startContainer==lastcontainer){
 	return false
@@ -180,12 +204,12 @@ function getWordAtPoint(x, y) {
   return null;
 }
 
-function wrapWordInTag(word,parentElem){
+function wrapWordInTag(word,parentElem,range){
 	if(!stillinword){
 		//console.log("WRAPPING.... "+word)
 		curtext=parentElem.innerHTML
 		if(!parentElem.classList.contains("highlightcunei")){
-			walk(parentElem,word)
+			walk(parentElem,word,range)
 		}
 		lasthighlight=parentElem
 		stillinword=true
@@ -235,7 +259,7 @@ function formatPopup(data,spanitem,word){
 		spanitem.setAttribute("title",thetext.trim())
 		wordinfocache[querylanguage][word]=thetext
 		console.log(wordinfocache[querylanguage][word])
-	}	
+	}
 }
 
 
@@ -257,11 +281,11 @@ function wordInformationFromWikidata(lang,word,spanitem){
 			OPTIONAL {?l wikibase:lexicalCategory ?lexcat . ?lexcat rdfs:label ?lexcatlabel . FILTER((LANG(?lexcatlabel))= "en") }
 			?lf ontolex:representation ?rep .
 			OPTIONAL {?lf wikibase:grammaticalFeature ?lfgram . ?lfgram rdfs:label ?gflabel . FILTER((LANG(?gflabel))= "en")}
-			?l ontolex:sense ?sense . ?sense wdt:P5137 ?senseval . OPTIONAL { ?senseval rdfs:label ?senselabel . FILTER((LANG(?senselabel))= "en") }        
-			FILTER(str(?rep)=lcase("${query}"))       
+			?l ontolex:sense ?sense . ?sense wdt:P5137 ?senseval . OPTIONAL { ?senseval rdfs:label ?senselabel . FILTER((LANG(?senselabel))= "en") }
+			FILTER(str(?rep)=lcase("${query}"))
 		  }
 		  GROUP BY ?l ?lf ?senseval ?senselabel ?lexcatlabel ?lfgram ?gflabel
-		  ORDER BY ?l ?lfgram ?sense ?senselabel 
+		  ORDER BY ?l ?lfgram ?sense ?senselabel
 		  LIMIT ${limit}
 		`;
 	  //sparql=sparql.replaceAll("${query}",word)
