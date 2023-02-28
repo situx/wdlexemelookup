@@ -113,6 +113,11 @@ function handleText(node,word,range) {
 	span.classList.add("highlightcuneipopup")
 	span.addEventListener("mouseover",function(event){document.getElementById('myCuneiPopup').classList.toggle('show')})
 	//console.log(curtext)
+	var matcher=new RegExp(word.replaceAll("(","\\(").replaceAll(")","\\)"), "g")
+	console.log(matcher)
+	mres=curtext.matchAll(matcher)
+	console.log(Array.from(mres))
+	console.log(getCaretCharacterOffsetWithin(node,range))
 	if(word in wordinfocache[querylanguage]){
 		curtext=curtext.replaceAll(word,"<span id=\"highlightcunei\" class=\"highlightcunei\" title=\""+wordinfocache[querylanguage][word]+"\">"+word+"</span>")
 		node.innerHTML = curtext;
@@ -186,6 +191,13 @@ function replaceAll(str,mapObj){
 	return str
 }
 
+function indexOfGroup(match, n) {
+    var ix= match.index;
+    for (var i= 1; i<n; i++)
+        ix+= match[i].length;
+    return ix;
+}
+
 function getWordAtPoint(x, y) {
   range=getScrollAwareRange(x,y)
   if(range!=null && range.startContainer!=lastcontainer){
@@ -202,6 +214,18 @@ function getWordAtPoint(x, y) {
 	return false
   }
   return null;
+}
+
+function getCaretCharacterOffsetWithin(element,range) {
+    var caretOffset = 0;
+    var doc = element.ownerDocument || element.document;
+    var win = doc.defaultView || doc.parentWindow;
+    var sel;
+	var preCaretRange = range.cloneRange();
+	preCaretRange.selectNodeContents(element);
+	preCaretRange.setEnd(range.endContainer, range.endOffset);
+	caretOffset = preCaretRange.toString().length;
+    return caretOffset;
 }
 
 function wrapWordInTag(word,parentElem,range){
