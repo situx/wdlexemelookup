@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Homburg"
+  given-names: "Timo"
+  orcid: "https://orcid.org/0000-0002-9499-5840"
+title: "Wikidata Lexeme Lookup"
+version: 0.1
+url: "https://github.com/situx/wdlexemelookup"
